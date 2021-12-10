@@ -40,7 +40,7 @@ class WorkspaceVariable:
         description(str): The documentation of the variable as in methods.cc
         ws(Workspace): The associated workspace (if available) or None
     """
-    def __init__(self, ws_id, name, group, description, ws = None):
+    def __init__(self, ws_id, name, group, description, ws=None):
         self.ws_id = ws_id
         self.name = name
         self.group = group
@@ -397,6 +397,14 @@ class WorkspaceVariable:
                                         "data" : (v.ptr, False),
                                         "version" : 3}
 
+    def delete(self):
+        """
+        Frees the memory occupied by the variable without removing it
+        from the global list of WSMs.
+        """
+        if self.ws:
+            arts_api.delete_variable(self.ws.ptr, self.ws_id)
+
     def erase(self):
         """
         Erase workspace variable from its associated workspace.
@@ -466,4 +474,7 @@ group_ids = dict([(id, name) for (name,id) in enumerate(group_names)])
 workspace_variables = dict()
 for v in WorkspaceVariable.iter():
     workspace_variables[v.name] = v
+
+
+
 

@@ -20,7 +20,8 @@ class Agenda:
             ptr(c.c_void_p): Pointer to Agenda object created with the parse_agenda
             method of the ARTS C API.
         """
-        self.ptr       = ptr
+        self._owner = False
+        self.ptr = ptr
 
     @classmethod
     def create(cls, name):
@@ -37,6 +38,8 @@ class Agenda:
 
         """
         ptr = arts_api.create_agenda(name.encode())
+        agenda = Agenda(ptr)
+        agenda._owner = True
         return Agenda(ptr)
 
     def clear(self):
@@ -145,7 +148,7 @@ class Agenda:
 
     def __del__(self):
         """Destroys ARTS C API Agenda object associated with this Agenda object."""
-        if self.ptr:
+        if self._owner:
             arts_api.destroy_agenda(self.ptr)
 
     @staticmethod

@@ -88,6 +88,7 @@ class InteractiveWorkspace : private Workspace {
 
   using Workspace::is_initialized;
   using Workspace::operator[];
+  using Workspace::del;
 
   /** Workspace intialization
    *
@@ -323,7 +324,6 @@ class InteractiveWorkspace : private Workspace {
   void swap(Index i, Index j);
 
  private:
-  
   /** Resize workspace stack
    *
    * This method resizes the array of stacks that manages the

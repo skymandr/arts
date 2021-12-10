@@ -365,8 +365,8 @@ class Workspace:
             agenda_verbosity (int): Verbosity level for agendas (0-3),
                                     0 by default
         """
-
         self.__dict__["_vars"] = dict()
+        self._cache = {}
         self.ptr = arts_api.create_workspace(verbosity, agenda_verbosity)
         self.workspace_size = arts_api.get_number_of_variables()
         for name in workspace_methods:
@@ -400,8 +400,9 @@ class Workspace:
         with CoutCapture(self, silent = True):
             e_ptr = arts_api.execute_workspace_method(self.ptr, m_id, len(args_out),
                                                       arg_out_ptr, len(args_in), arg_in_ptr)
+        # Delete values of temporary variables and put them on stack.
         for t in ts[::-1]:
-            t.erase()
+            self.free_temperary_variable(t)
 
     def create_variable(self, group, name):
         """
@@ -428,7 +429,7 @@ class Workspace:
         self._vars[wsv.name] = wsv
         return wsv
 
-    def add_variable(self, var, group = None):
+    def set_temporary_variable(self, var, group=None):
         """
         This will try to copy a given python variable to the ARTS workspace and
         return a WorkspaceVariable object representing this newly created
@@ -444,6 +445,39 @@ class Workspace:
         The user should not have to call this method explicitly, but instead it
         is used by the WorkspaceMethod call function to transfer python
         variable arguments to the ARTS workspace.
+
+        Args:
+            var: Python variable of type int, str, [str], [int] or np.ndarray
+            which should be copied to the workspace.
+            group: The group of the variable, if known.
+        """
+        if type(var) == WorkspaceVariable:
+            return var
+
+        # Create WSV in ARTS Workspace
+        if group is None:
+            group = WorkspaceVariable.get_group_id(var)
+
+        group = group_names[group]
+
+        # Check there's a free variable in the cache.
+        cached = self._cache.setdefault(group, [])
+        if len(cached) > 0:
+            wsv = cached.pop()
+        else:
+            wsv = self.create_variable(group, None)
+
+        # Set WSV value using the ARTS C API
+        self.set_variable(wsv, var)
+        self._vars[wsv.name] = wsv
+        return wsv
+
+    def free_temporary_variable(self, var):
+        var.delete()
+        self._cache[var.group].append(var)
+
+    def add_temporary(self, var, group=None):
+        """
 
         Args:
             var: Python variable of type int, str, [str], [int] or np.ndarray

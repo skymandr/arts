@@ -628,6 +628,19 @@ long add_variable(InteractiveWorkspace *workspace,
                   long group_id,
                   const char *name);
 
+/** Delete variable.
+ *
+ * This variable frees the memory occupied by the topmost variable on
+ * the WSVs stack.
+ *
+ * @param workspace The pointer to the InteractiveWorkspace object where to create
+ * the object.
+ * @param long id The WSV id of the variable to delete.
+ */
+DLL_PUBLIC
+void delete_variable(InteractiveWorkspace *workspace,
+                     long id);
+
 /** Erase variable from workspace.
  *
  * This variable removes a variable from the workspace and the global wsv_data

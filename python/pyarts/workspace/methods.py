@@ -217,7 +217,7 @@ class WorkspaceMethod:
                 if type(args[j]) == WorkspaceVariable:
                     ins[k] = args[j].ws_id
                 else:
-                    temps.append(ws.add_variable(args[j]))
+                    temps.append(ws.set_temporary_variable(args[j]))
                     ins[k] = temps[-1].ws_id
             # Parse generic input arguments
             elif j < self.n_out + self.n_g_out + len(ins) + self.n_g_in:
@@ -246,7 +246,7 @@ class WorkspaceMethod:
                 if type(arg) == WorkspaceVariable:
                     ins[i] = arg.ws_id
                 else:
-                    temps.append(ws.add_variable(arg))
+                    temps.append(ws.set_temporary_variable(arg))
                     ins[i] = temps[-1].ws_id
 
             if k in outs_names:
@@ -366,7 +366,7 @@ class WorkspaceMethod:
                 if arg_converted is None:
                     raise Exception("Could not convert input {} to expected group {}"
                                     .format(arg, group_names[gid]))
-                temps.append(ws.add_variable(arg_converted, gid))
+                temps.append(ws.set_temporary_variable(arg_converted, gid))
                 arts_args_in.append(temps[-1].ws_id)
         return (m_id, arts_args_out, arts_args_in, temps)
 
@@ -453,8 +453,10 @@ class WorkspaceMethod:
 
         # Remove temporaries from workspace (in reverse order).
         for t in temps[::-1]:
-            t.erase()
-
+            # Arguments of Set methods are moved by reference so
+            # mustn't be free'd.
+            if not self.name.endswith("Set"):
+                ws.free_temporary_variable(t)
 
     def describe(self):
         """ Print WSM documentation. """

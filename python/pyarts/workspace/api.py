@@ -423,7 +423,11 @@ arts_api.set_variable_value.restype  =  c.c_char_p
 arts_api.add_variable.restype  = c.c_long
 arts_api.add_variable.argtypes = [c.c_void_p, c.c_long, c.c_char_p]
 
-# Remove given variable from workspace.
+# Free memory of a given variable.
+arts_api.delete_variable.restype  = None
+arts_api.delete_variable.argtypes = [c.c_void_p, c.c_long]
+
+# Free memory and delete variable record.
 arts_api.erase_variable.restype  = None
 arts_api.erase_variable.argtypes = [c.c_void_p, c.c_long, c.c_long]
 

@@ -644,6 +644,12 @@ long add_variable(InteractiveWorkspace *workspace,
 }
 
 DLL_PUBLIC
+void delete_variable(InteractiveWorkspace *workspace,
+                     long id) {
+    return workspace->del(id);
+}
+
+DLL_PUBLIC
 void erase_variable(InteractiveWorkspace *workspace, long id, long group_id) {
   return workspace->erase_variable(id, group_id);
 }
